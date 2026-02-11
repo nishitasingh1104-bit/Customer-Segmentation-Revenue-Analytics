@@ -31,7 +31,7 @@ INSERT INTO products VALUES
 (104,'Office Chair','Home'),
 (105,'Smart Watch','Electronics');
 
-order table
+--3. Order Table
 
 CREATE TABLE orders (
     order_id INT PRIMARY KEY,
@@ -51,7 +51,7 @@ INSERT INTO orders VALUES
 (1007,2,'2024-03-20',28000);
 
 
- --3. Orders Item Table
+ --4. Orders Item Table
 
 CREATE TABLE order_items (
     order_item_id INT PRIMARY KEY,
