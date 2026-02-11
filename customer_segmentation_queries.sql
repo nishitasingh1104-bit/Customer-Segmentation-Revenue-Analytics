@@ -1,5 +1,5 @@
 create schema customers;
-__customers table__
+--1. Customers Table
 CREATE TABLE customers(
     customer_id INT PRIMARY KEY,
     customer_name VARCHAR(100),
@@ -16,7 +16,7 @@ INSERT INTO customers VALUES
 (4,'Priya Verma','Female',26,'Pune','India'),
 (5,'Ankit Patel','Male',38,'Ahmedabad','India');
 
- __product table__
+ --2. Product Table
  
  CREATE TABLE products (
     product_id INT PRIMARY KEY,
@@ -51,7 +51,7 @@ INSERT INTO orders VALUES
 (1007,2,'2024-03-20',28000);
 
 
-orders item table
+ --3. Orders Item Table
 
 CREATE TABLE order_items (
     order_item_id INT PRIMARY KEY,
@@ -73,7 +73,7 @@ INSERT INTO order_items VALUES
 (7,1006,102,1,52000),
 (8,1007,105,1,28000);
 
-revenue by month
+--5. Revenue By Month
 
 SELECT 
     DATE_FORMAT(order_date, '%Y-%m') AS order_month,
@@ -82,44 +82,14 @@ FROM orders
 GROUP BY order_month
 ORDER BY order_month;
 
-top10 customers by lifetime value
 
-SELECT
-    c.customer_id,
-    c.customer_name,
-    SUM(o.total_amount) AS lifetime_value
-FROM customers c
-JOIN orders o
-ON c.customer_id = o.customer_id
-GROUP BY 1,2
-ORDER BY lifetime_value DESC
-LIMIT 10;
-
-repeat vs 1 time customers
-
-WITH customer_orders AS (
-    SELECT
-        customer_id,
-        COUNT(order_id) AS order_count
-    FROM orders
-    GROUP BY customer_id
-)
-SELECT
-    CASE 
-        WHEN order_count > 1 THEN 'Repeat Customer'
-        ELSE 'One-Time Customer'
-    END AS customer_type,
-    COUNT(*) AS customer_count
-FROM customer_orders
-GROUP BY 1;
-
-average order value 
+-- 6. Average Order Value 
 
 SELECT
     ROUND(SUM(total_amount) / COUNT(order_id), 2) AS avg_order_value
 FROM orders;
 
-revenue vy product category(joins+group)
+--7. Revenue Vs Product Category(joins+group)
 
 SELECT
     p.category,
@@ -130,7 +100,7 @@ ON oi.product_id = p.product_id
 GROUP BY p.category
 ORDER BY category_revenue DESC;
 
-customer retention rate 
+--8. Customer Retention Rate 
 
 WITH order_counts AS (
     SELECT
@@ -146,7 +116,7 @@ SELECT
     ) AS retention_rate_percentage
 FROM order_counts;
 
-Month-over-Month Revenue Growth (WINDOW FUNCTION)
+--9. Month-over-Month Revenue Growth (WINDOW FUNCTION)
 
 WITH monthly_sales AS (
     SELECT 
@@ -165,7 +135,7 @@ SELECT
     ) AS growth_percentage
 FROM monthly_sales;
 
-Rank Customers by Spend (RANK vs DENSE_RANK)
+--10. Rank Customers by Spend (RANK vs DENSE_RANK)
 
 SELECT
     c.customer_name,
@@ -176,56 +146,4 @@ FROM customers c
 JOIN orders o
 ON c.customer_id = o.customer_id
 GROUP BY c.customer_name;
-
-Pareto Analysis (Top 20% Customers → Revenue %)
-
-WITH customer_revenue AS (
-    SELECT
-        customer_id,
-        SUM(total_amount) AS revenue
-    FROM orders
-    GROUP BY customer_id
-),
-ranked_customers AS (
-    SELECT
-        *,
-        NTILE(5) OVER (ORDER BY revenue DESC) AS revenue_bucket
-    FROM customer_revenue
-)
-SELECT
-    CASE 
-        WHEN revenue_bucket = 1 THEN 'Top 20% Customers'
-        ELSE 'Bottom 80% Customers'
-    END AS customer_group,
-    SUM(revenue) AS total_revenue
-FROM ranked_customers
-GROUP BY 1;
-
-10 New vs Repeat Customers by Month (Advanced)
-
-WITH first_order AS (
-    SELECT
-        customer_id,
-        MIN(order_date) AS first_order_date
-    FROM orders
-    GROUP BY customer_id
-)
-SELECT
-    DATE_FORMAT(o.order_date, '%Y-%m') AS order_month,
-    CASE
-        WHEN o.order_date = f.first_order_date THEN 'New Customer'
-        ELSE 'Repeat Customer'
-    END AS customer_type,
-    COUNT(DISTINCT o.customer_id) AS customer_count
-FROM orders o
-JOIN first_order f
-    ON o.customer_id = f.customer_id
-GROUP BY order_month, customer_type
-ORDER BY order_month;
-
-
-
-
-
-
 
